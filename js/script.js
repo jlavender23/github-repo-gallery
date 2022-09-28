@@ -1,6 +1,7 @@
 //This div is where your profile information will appear
 const overview = document.querySelector(".overview");
 const username = "jlavender23";
+const repoList = document.querySelector(".repo-list");
 
 const gitProfile = async function() {
     const userInfo = await fetch (`https://api.github.com/users/${username}`);
@@ -26,4 +27,21 @@ const displayUserInfo = function (data) {
   </div> 
 `;
     overview.append(div); //append the div to the overview element
+    gitRepos();
+};
+
+const gitRepos = async function () {
+    const fetchRepos = await fetch (`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
+    const repoData = await fetchRepos.json();
+    console.log(repoData);
+    repoDisplay(repoData);
+};
+
+const repoDisplay = function (repos) {//so that the function accepts the data returned from your last API call.
+    for (const repo of repos) {
+        const listItem = document.createElement("li");
+        listItem.classList.add("repo");//created a li for each repo and gav each item a class of repo
+        listItem.innerHTML = `<h3>${repo.name}</h3>`; // ...and gave an h3 element with the repo name
+        repoList.append(listItem); //appeneded the li to the global variable
+    }
 };
