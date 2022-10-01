@@ -2,13 +2,15 @@
 const overview = document.querySelector(".overview");
 const username = "jlavender23";
 const repoList = document.querySelector(".repo-list");
+const repoSection = document.querySelector(".repos");//where repo info appears
+const individualRepo= document.querySelector(".repo-data");
 
 const gitProfile = async function() {
     const userInfo = await fetch (`https://api.github.com/users/${username}`);
     const data = await userInfo.json();
-    console.log(data);
+   // console.log(data);
     displayUserInfo(data);
-}
+};
 
 gitProfile();
 
@@ -33,7 +35,7 @@ const displayUserInfo = function (data) {
 const gitRepos = async function () {
     const fetchRepos = await fetch (`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
     const repoData = await fetchRepos.json();
-    console.log(repoData);
+    //console.log(repoData);
     repoDisplay(repoData);
 };
 
@@ -44,4 +46,45 @@ const repoDisplay = function (repos) {//so that the function accepts the data re
         listItem.innerHTML = `<h3>${repo.name}</h3>`; // ...and gave an h3 element with the repo name
         repoList.append(listItem); //appeneded the li to the global variable
     }
+};
+
+
+//ADD CLICK EVENT
+repoList.addEventListener("click", function(e) {
+    if (e.target.matches("h3")) {// to check if the event target(element clicked on) matches the h3 element
+        const repoName = e.target.innerText;
+        speceficRepo(repoName);
+    }
+});
+
+//CREATE A FUNCTION TO GET SPECIFIC REPO INFO
+const speceficRepo = async function (repoName) {
+    const grabInfo = await fetch (`https://api.github.com/repos/${username}/${repoName}`);
+    const repoInfo = await grabInfo.json();//this is to resolve and save the JSON response
+    //console.log(repoInfo);
+    //grab languages
+    const fetchLanguages = await fetch(repoInfo.languages_url); //to fetch data from language_url property of your repoInfo
+    const languageData = await fetchLanguages.json(); //to save the JSON response.
+    //console.log(languageData);
+    const languages = [];
+    for (const language in languageData) {
+        languages.push(language);
+    }
+    
+    displaySpeceficRepo (repoInfo, languages);
+};
+
+const displaySpeceficRepo = function (repoInfo, languages) {
+    individualRepo.innerHTML = ""; //empty the HTML of the section with a class of “repo-data” where the individual repo data will appear.
+    individualRepo.classList.remove("hide");
+    repoSection.classList.add("hide");
+    const div = document.createElement("div");
+    div.innerHTML = `
+    <h3>Name: ${repoInfo.name}</h3>
+    <p>Description: ${repoInfo.description}</p>
+    <p>Default Branch: ${repoInfo.default_branch}</p>
+    <p>Languages: ${languages.join(", ")}</p>
+    <a class="visit" href="${repoInfo.html_url}" target="_blank" rel="noreferrer noopener">View Repo on GitHub!</a>
+    `;
+    individualRepo.append(div);
 };
