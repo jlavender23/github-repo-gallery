@@ -4,6 +4,8 @@ const username = "jlavender23";
 const repoList = document.querySelector(".repo-list");
 const repoSection = document.querySelector(".repos");//where repo info appears
 const individualRepo= document.querySelector(".repo-data");
+const backButton = document.querySelector(".view-repos");
+const filterInput = document.querySelector(".filter-repos");
 
 const gitProfile = async function() {
     const userInfo = await fetch (`https://api.github.com/users/${username}`);
@@ -16,7 +18,7 @@ gitProfile();
 
 const displayUserInfo = function (data) {
     const div = document.createElement("div");
-    div.classList.add(".user-info");
+    div.classList.add("user-info");
     div.innerHTML =
     `<figure>
     <img alt="user avatar" src=${data.avatar_url} />
@@ -40,6 +42,7 @@ const gitRepos = async function () {
 };
 
 const repoDisplay = function (repos) {//so that the function accepts the data returned from your last API call.
+    filterInput.classList.remove("hide");
     for (const repo of repos) {
         const listItem = document.createElement("li");
         listItem.classList.add("repo");//created a li for each repo and gav each item a class of repo
@@ -78,6 +81,7 @@ const displaySpeceficRepo = function (repoInfo, languages) {
     individualRepo.innerHTML = ""; //empty the HTML of the section with a class of “repo-data” where the individual repo data will appear.
     individualRepo.classList.remove("hide");
     repoSection.classList.add("hide");
+    backButton.classList.remove("hide");
     const div = document.createElement("div");
     div.innerHTML = `
     <h3>Name: ${repoInfo.name}</h3>
@@ -88,3 +92,28 @@ const displaySpeceficRepo = function (repoInfo, languages) {
     `;
     individualRepo.append(div);
 };
+
+backButton.addEventListener("click", function(){
+    repoSection.classList.remove("hide");
+    individualRepo.classList.add("hide");
+    backButton.classList.add("hide");
+});
+
+
+//dynamic search
+filterInput.addEventListener("input", function(e){
+    const searchValue= e.target.value;
+    //console.log(searchValue);//shows what you type in console
+    const repos = document.querySelectorAll(".repo");//selects all elements with a class of repo
+    const searchLowerText = searchValue.toLowerCase();
+
+    for(const repo of repos ){//looping through each repo of repos element
+        const repoLowerText = repo.innerText.toLowerCase();
+        if (repoLowerText.includes (searchLowerText)) {
+            repo.classList.remove("hide");
+        } else {
+            repo.classList.add("hide");
+        }
+    }
+});
+
